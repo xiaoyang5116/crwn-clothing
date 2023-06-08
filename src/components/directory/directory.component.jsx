@@ -1,5 +1,5 @@
 import React from "react";
-import categoriesJson from "../../categories.json";
+import categoriesJson from "./categories.json";
 import CategoryItem from "../category-item/category-item.component";
 import "./directory.styles.scss";
 
