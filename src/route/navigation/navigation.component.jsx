@@ -4,9 +4,13 @@ import { useUser } from "../../context/user.context";
 import { signOutUser } from "../../utils/firebase/firebase.utils";
 
 import "./navigation.styles.scss";
+import CartIcon from "../../components/cart-icon/cart-icon.component";
+import CartDropdown from "../../components/cart-dropdown/cart-dropdown.component";
+import { useCart } from "../../context/cart.context";
 
 const Navigation = () => {
   const { currentUser } = useUser();
+  const { isCartOpen } = useCart();
 
   return (
     <>
@@ -27,7 +31,9 @@ const Navigation = () => {
               SIGN IN
             </Link>
           )}
+          <CartIcon />
         </div>
+        {isCartOpen && <CartDropdown />}
       </div>
       <Outlet />
     </>
