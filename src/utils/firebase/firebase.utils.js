@@ -15,7 +15,7 @@ import {
   doc,
   setDoc,
   getDoc,
-  getDocs,  // 获取多个文档
+  getDocs, // 获取多个文档
   collection,
   writeBatch,
   query,
@@ -69,11 +69,9 @@ export const getCategoriesAndDocuments = async () => {
   const q = query(collectionRef);
 
   const querySnapshot = await getDocs(q);
-  const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
-    const { title, items } = docSnapshot.data();
-    acc[title.toLowerCase()] = items;
-    return acc
-  }, {});
+  const categoryMap = querySnapshot.docs.map((docSnapshot) =>
+    docSnapshot.data()
+  );
 
   return categoryMap;
 };
