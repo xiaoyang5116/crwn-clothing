@@ -1,9 +1,12 @@
 import { compose, createStore, applyMiddleware } from "redux";
-import { logger } from "redux-logger";
-import { rootReducer } from "./root-reducer";
+// import { logger } from "redux-logger";
+// import thunk from "redux-thunk";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import thunk from "redux-thunk";
+import createSagaMiddleware from 'redux-saga'
+
+import { rootReducer } from "./root-reducer";
+import { rootSaga } from "./root-saga";
 
 const persistConfig = {
   key: "root",
@@ -12,12 +15,14 @@ const persistConfig = {
   whitelist: ["cart"],
 };
 
+const sagaMiddleware = createSagaMiddleware()
+
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// 开发环境 使用logger
 const middleware = [
   // process.env.NODE_ENV === "development" && logger,
-  thunk,
+  // thunk,
+  sagaMiddleware
 ].filter(Boolean);
 
 // 使用 redux-devtools
@@ -30,5 +35,7 @@ const composeEnhancer =
 const composeEnhancers = composeEnhancer(applyMiddleware(...middleware));
 
 export const store = createStore(persistedReducer, undefined, composeEnhancers);
+
+sagaMiddleware.run(rootSaga)
 
 export const persistor = persistStore(store);
