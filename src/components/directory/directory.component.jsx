@@ -1,4 +1,3 @@
-import React from "react";
 import categoriesJson from "./categories.json";
 import DirectoryItem from "../directory-item/directory-item.component";
 import "./directory.styles.scss";
