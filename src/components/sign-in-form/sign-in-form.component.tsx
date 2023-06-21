@@ -7,7 +7,8 @@ import {
   googleSignInStart,
 } from "../../store/user/user.action";
 
-import "./sign-in-form.styles.scss";
+import { SignInContainer, ButtonsContainer } from "./sign-in-form.styles";
+import { AuthError, AuthErrorCodes } from "firebase/auth";
 
 const defaultFormFields = {
   email: "",
@@ -27,23 +28,23 @@ const SignInForm = () => {
     setFormFields(defaultFormFields);
   };
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormFields({ ...formFields, [name]: value });
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     try {
       dispatch(emailSignInStart(email, password));
       resetFormFields();
     } catch (error) {
-      switch (error.code) {
-        case "auth/user-not-found":
+      switch ((error as AuthError).code) {
+        case AuthErrorCodes.USER_DELETED:
           alert("no user associated with this email");
           break;
-        case "auth/wrong-password":
+        case AuthErrorCodes.INVALID_PASSWORD:
           alert("incorrect password for email");
           break;
         default:
@@ -53,7 +54,7 @@ const SignInForm = () => {
   };
 
   return (
-    <div className="sign-in-container">
+    <SignInContainer>
       <h2>Already have an account?</h2>
       <span>Sign in with your email and password</span>
       <form onSubmit={handleSubmit}>
@@ -75,7 +76,7 @@ const SignInForm = () => {
           value={password}
         />
 
-        <div className="buttons-container">
+        <ButtonsContainer>
           <Button type="submit" buttonType={BUTTON_TYPE_CLASS.inverted}>
             Sign In
           </Button>
@@ -86,9 +87,9 @@ const SignInForm = () => {
           >
             Google Sign In
           </Button>
-        </div>
+        </ButtonsContainer>
       </form>
-    </div>
+    </SignInContainer>
   );
 };
 
