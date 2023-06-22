@@ -7,8 +7,14 @@ import {
 import { selectCartItems } from "../../store/cart/cart.selector";
 
 import "./checkout-item.styles.scss";
+import { CartItem as TCartItem } from "../../store/cart/cart.type";
+import { FC, memo } from "react";
 
-const CheckoutItem = ({ cartItem }) => {
+type CheckoutItemProps = {
+  cartItem: TCartItem;
+};
+
+const CheckoutItem: FC<CheckoutItemProps> = memo(({ cartItem }) => {
   const { name, imageUrl, price, quantity } = cartItem;
   const dispatch = useDispatch();
   const allCartItem = useSelector(selectCartItems);
@@ -40,6 +46,6 @@ const CheckoutItem = ({ cartItem }) => {
       </div>
     </div>
   );
-};
+});
 
 export default CheckoutItem;
