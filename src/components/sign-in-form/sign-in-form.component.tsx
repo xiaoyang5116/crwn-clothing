@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormInput from "../form-input/form-input.component";
 import Button, { BUTTON_TYPE_CLASS } from "../button/button.component";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   emailSignInStart,
   googleSignInStart,
@@ -9,6 +9,8 @@ import {
 
 import { SignInContainer, ButtonsContainer } from "./sign-in-form.styles";
 import { AuthError, AuthErrorCodes } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { selectorCurrentUser } from "../../store/user/user.selector";
 
 const defaultFormFields = {
   email: "",
@@ -18,7 +20,15 @@ const defaultFormFields = {
 const SignInForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const dispatch = useDispatch();
+  const currentUser = useSelector(selectorCurrentUser);
+  const navigate = useNavigate();
   const { email, password } = formFields;
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
 
   const SignInWithGoogle = async () => {
     dispatch(googleSignInStart());

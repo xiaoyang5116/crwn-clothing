@@ -1,11 +1,13 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import FormInput from "../form-input/form-input.component";
 import Button from "../button/button.component";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { signUpStart } from "../../store/user/user.action";
 
 import { SignUpContainer } from "./sign-up-form.styles";
 import { AuthError, AuthErrorCodes } from "firebase/auth";
+import { selectorCurrentUser } from "../../store/user/user.selector";
+import { useNavigate } from "react-router-dom";
 
 const defaultFormFields = {
   displayName: "",
@@ -17,7 +19,15 @@ const defaultFormFields = {
 const SignUpForm = () => {
   const dispatch = useDispatch();
   const [formFields, setFormFields] = useState(defaultFormFields);
+  const currentUser = useSelector(selectorCurrentUser);
+  const navigate = useNavigate();
   const { displayName, email, password, confirmPassword } = formFields;
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
