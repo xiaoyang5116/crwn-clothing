@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# 主要技术栈
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+react18 + typescript + redux + redux-saga + react-router-dom6 + firebase
 
-## Available Scripts
+## 本地运行
 
-In the project directory, you can run:
+```
+yarn
 
-### `npm start`
+yarn start
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 使用 `reselect` 避免 redux 重复渲染
+```
+import { createSelector } from "reselect";
+import { CartState } from "./cart.reducer";
+import { RootState } from "../store";
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+const selectCartReducer = (state: RootState): CartState => state.cart;
 
-### `npm test`
+export const selectIsCartOpen = createSelector(
+  [selectCartReducer],
+  (cart) => cart.isCartOpen
+);
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 使用 `redux-presist` 实现 `redux` 数据持久化
+```
+import { compose, createStore, applyMiddleware, Middleware } from "redux";
+import { logger } from "redux-logger";
+import { persistStore, persistReducer, PersistConfig } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import createSagaMiddleware from "redux-saga";
 
-### `npm run build`
+import { rootReducer } from "./root-reducer";
+import { rootSaga } from "./root-saga";
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+export type RootState = ReturnType<typeof rootReducer>;
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
+  }
+}
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+type ExtendedPersistConfig = PersistConfig<RootState> & {
+  whitelist: (keyof RootState)[];
+};
 
-### `npm run eject`
+const persistConfig: ExtendedPersistConfig = {
+  key: "root",
+  storage,
+  // blacklist: ["user"],
+  whitelist: ["cart"],
+};
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+const sagaMiddleware = createSagaMiddleware();
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+const middleware = [
+  sagaMiddleware,
+  process.env.NODE_ENV !== "production" && logger,
+].filter((middleware): middleware is Middleware => Boolean(middleware));
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+// 使用 redux-devtools
+const composeEnhancer =
+  (process.env.NODE_ENV !== "production" &&
+    window &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
+  compose;
 
-## Learn More
+const composeEnhancers = composeEnhancer(applyMiddleware(...middleware));
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+export const store = createStore(persistedReducer, undefined, composeEnhancers);
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+sagaMiddleware.run(rootSaga);
 
-### Code Splitting
+export const persistor = persistStore(store);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 使用 `firebase` 管理数据
